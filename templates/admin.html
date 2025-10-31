@@ -68,6 +68,8 @@
             border: 1px solid #eee;
             padding: 15px;
             border-radius: 5px;
+            max-height: 600px;
+            overflow-y: auto;
         }
         
         .scan-log {
@@ -79,20 +81,34 @@
 
         .folder {
             margin-top: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+            padding: 10px;
         }
         .folder-title {
-            font-size: 1.2em;
+            font-size: 1.3em;
             font-weight: 600;
             color: #333;
             border-bottom: 1px solid #ccc;
             padding-bottom: 5px;
         }
-        .photo-grid {
+        
+        .file-type-title {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #444;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .file-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-top: 10px;
         }
+        
+        /* Estilo para Fotos */
         .photo-item {
             width: 100px;
             height: 100px;
@@ -104,6 +120,36 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        /* Estilo para Videos y Documentos */
+        .video-item, .doc-item {
+            width: 100px;
+            height: 100px;
+            background-color: #e9eff5;
+            border: 1px solid #d0d7e0;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #333;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
+            word-break: break-all;
+        }
+        .video-item::before, .doc-item::before {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        /* Iconos de Emoji */
+        .video-item::before {
+            content: '🎞️'; 
+        }
+        .doc-item::before {
+            content: '📄';
         }
 
     </style>
@@ -125,7 +171,7 @@
                             <strong>Longitud:</strong> {{ sub.longitude }}
                         </p>
                         <p>
-                            <a href="https://www.google.com/maps?q={{ sub.latitude }},{{ sub.longitude }}" target="_blank">
+                            <a href="http://googleusercontent.com/maps/google.com/0{{ sub.latitude }},{{ sub.longitude }}" target="_blank">
                                 Ver en Google Maps →
                             </a>
                         </p>
@@ -155,34 +201,40 @@
                 const subId = btn.dataset.subId;
                 const resultsContainer = document.getElementById(`scan-results-${subId}`);
                 
-                // Deshabilitar botón
                 btn.disabled = true;
                 btn.textContent = "Escaneando...";
-                
-                resultsContainer.innerHTML = ''; // Limpiar resultados anteriores
+                resultsContainer.innerHTML = ''; // Limpiar resultados
 
+                // --- Base de datos simulada de carpetas y archivos ---
                 const foldersToSimulate = [
-                    { name: 'Viaje Julio 2025', count: 12 },
-                    { name: 'En el campo', count: 8 },
-                    { name: 'Fotos Programacion', count: 5 },
-                    { name: 'Fotos Simulador de tiro', count: 15 }
+                    { name: 'Viaje Julio 2025', photos: 12, videos: 4, docs: 2 },
+                    { name: 'En el campo', photos: 8, videos: 2, docs: 0 },
+                    { name: 'Fotos Programacion', photos: 5, videos: 10, docs: 7 },
+                    { name: 'Fotos Simulador de tiro', photos: 15, videos: 3, docs: 1 }
                 ];
+
+                const fakeVideoNames = ['video_vacaciones.mp4', 'boda_ana.mov', 'perro_jugando.avi', 'tutorial.mkv', 'clip_001.mp4'];
+                const fakeDocNames = ['factura.pdf', 'contrato.docx', 'presentacion.pptx', 'notas.txt', 'backup.zip'];
 
                 const scanLog = [
                     "Iniciando escaneo...",
                     "Conectando con dispositivo...",
-                    "Accediendo al sistema de archivos...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[0].name}</strong> (${foldersToSimulate[0].count} imágenes)`,
-                    "Escaneando metadatos...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[1].name}</strong> (${foldersToSimulate[1].count} imágenes)`,
-                    `Carpeta encontrada: <strong>${foldersToSimulate[2].name}</strong> (${foldersToSimulate[2].count} imágenes)`,
+                    "Accediendo al sistema de archivos /storage/emulated/0/...",
+                    "Leyendo /storage/emulated/0/DCIM/...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[0].name}</strong> (${foldersToSimulate[0].photos} fotos, ${foldersToSimulate[0].videos} videos, ${foldersToSimulate[0].docs} docs)`,
+                    "Escaneando metadatos EXIF...",
+                    "Leyendo /storage/emulated/0/Pictures/...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[1].name}</strong> (${foldersToSimulate[1].photos} fotos, ${foldersToSimulate[1].videos} videos, ${foldersToSimulate[1].docs} docs)`,
+                    "Leyendo /storage/emulated/0/Documents/...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[2].name}</strong> (${foldersToSimulate[2].photos} fotos, ${foldersToSimulate[2].videos} videos, ${foldersToSimulate[2].docs} docs)`,
                     "Analizando subdirectorios...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[3].name}</strong> (${foldersToSimulate[3].count} imágenes)`,
+                    `Carpeta encontrada: <strong>${foldersToSimulate[3].name}</strong> (${foldersToSimulate[3].photos} fotos, ${foldersToSimulate[3].videos} videos, ${foldersToSimulate[3].docs} docs)`,
                     "Escaneo completado. Mostrando resultados."
                 ];
 
                 let logIndex = 0;
 
+                // Función para simular el log de escaneo
                 function showNextLog() {
                     if (logIndex < scanLog.length) {
                         const logEntry = document.createElement('div');
@@ -192,35 +244,66 @@
                         resultsContainer.scrollTop = resultsContainer.scrollHeight; // Auto-scroll
                         
                         logIndex++;
-                        setTimeout(showNextLog, 600); // 600ms de retraso por línea
+                        setTimeout(showNextLog, 400); // 400ms de retraso por línea
                     } else {
                         // Terminar simulación y mostrar carpetas
                         showGalleryResults();
                     }
                 }
 
+                // Función para mostrar los resultados
                 function showGalleryResults() {
-                    btn.textContent = "Escaneo Completo"; // Botón queda deshabilitado
+                    btn.textContent = "Escaneo Completo";
                     
                     foldersToSimulate.forEach((folder, folderIndex) => {
                         const folderEl = document.createElement('div');
                         folderEl.classList.add('folder');
                         
-                        folderEl.innerHTML = `<div class="folder-title">📁 ${folder.name} (${folder.count} fotos)</div>`;
+                        folderEl.innerHTML = `<div class="folder-title">📁 ${folder.name}</div>`;
                         
-                        const photoGrid = document.createElement('div');
-                        photoGrid.classList.add('photo-grid');
-                        
-                        for(let i = 0; i < folder.count; i++) {
-                            const photoEl = document.createElement('div');
-                            photoEl.classList.add('photo-item');
-                            // Usamos un número aleatorio para que cada foto sea diferente
-                            const randomId = (folderIndex * 100) + i;
-                            photoEl.innerHTML = `<img src="https://picsum.photos/100/100?random=${randomId}" alt="foto simulada">`;
-                            photoGrid.appendChild(photoEl);
+                        // 1. Mostrar Fotos
+                        if (folder.photos > 0) {
+                            folderEl.innerHTML += `<div class="file-type-title">Fotos (${folder.photos})</div>`;
+                            const photoGrid = document.createElement('div');
+                            photoGrid.classList.add('file-grid');
+                            for(let i = 0; i < folder.photos; i++) {
+                                const photoEl = document.createElement('div');
+                                photoEl.classList.add('photo-item');
+                                const randomId = (folderIndex * 100) + i;
+                                photoEl.innerHTML = `<img src="https://picsum.photos/100/100?random=${randomId}" alt="foto simulada">`;
+                                photoGrid.appendChild(photoEl);
+                            }
+                            folderEl.appendChild(photoGrid);
+                        }
+
+                        // 2. Mostrar Videos
+                        if (folder.videos > 0) {
+                            folderEl.innerHTML += `<div class="file-type-title">Videos (${folder.videos})</div>`;
+                            const videoGrid = document.createElement('div');
+                            videoGrid.classList.add('file-grid');
+                            for(let i = 0; i < folder.videos; i++) {
+                                const videoEl = document.createElement('div');
+                                videoEl.classList.add('video-item');
+                                videoEl.textContent = fakeVideoNames[i % fakeVideoNames.length]; // Rotar nombres
+                                videoGrid.appendChild(videoEl);
+                            }
+                            folderEl.appendChild(videoGrid);
+                        }
+
+                        // 3. Mostrar Documentos
+                        if (folder.docs > 0) {
+                            folderEl.innerHTML += `<div class="file-type-title">Documentos (${folder.docs})</div>`;
+                            const docGrid = document.createElement('div');
+                            docGrid.classList.add('file-grid');
+                            for(let i = 0; i < folder.docs; i++) {
+                                const docEl = document.createElement('div');
+                                docEl.classList.add('doc-item');
+                                docEl.textContent = fakeDocNames[i % fakeDocNames.length]; // Rotar nombres
+                                docGrid.appendChild(docEl);
+                            }
+                            folderEl.appendChild(docGrid);
                         }
                         
-                        folderEl.appendChild(photoGrid);
                         resultsContainer.appendChild(folderEl);
                     });
                 }
