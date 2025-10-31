@@ -107,6 +107,12 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+
+        /* Quitar estilos de link a los items de archivo */
+        .file-grid a {
+            text-decoration: none;
+            color: inherit;
+        }
         
         /* Estilo para Fotos */
         .photo-item {
@@ -115,6 +121,7 @@
             background-color: #eee;
             border-radius: 5px;
             overflow: hidden;
+            border: 1px solid transparent; /* para hover */
         }
         .photo-item img {
             width: 100%;
@@ -139,6 +146,7 @@
             padding: 5px;
             box-sizing: border-box;
             word-break: break-all;
+            transition: border-color 0.2s, background-color 0.2s;
         }
         .video-item::before, .doc-item::before {
             font-size: 36px;
@@ -150,6 +158,13 @@
         }
         .doc-item::before {
             content: '📄';
+        }
+
+        /* Hover effect para items clickeables */
+        .file-grid a .video-item:hover,
+        .file-grid a .doc-item:hover {
+            border-color: #0065ff;
+            background-color: #f0f6ff;
         }
 
     </style>
@@ -205,30 +220,79 @@
                 btn.textContent = "Escaneando...";
                 resultsContainer.innerHTML = ''; // Limpiar resultados
 
-                // --- Base de datos simulada de carpetas y archivos ---
+                // --- Base de datos ESTATICA de carpetas y archivos ---
                 const foldersToSimulate = [
-                    { name: 'Viaje Julio 2025', photos: 12, videos: 4, docs: 2 },
-                    { name: 'En el campo', photos: 8, videos: 2, docs: 0 },
-                    { name: 'Fotos Programacion', photos: 5, videos: 10, docs: 7 },
-                    { name: 'Fotos Simulador de tiro', photos: 15, videos: 3, docs: 1 }
+                    {
+                        name: 'Viaje Julio 2025',
+                        images: [
+                            'https://i.ibb.co/gM1KCg6x/Captura-de-pantalla-2025-10-31-085119.png',
+                            'https://i.ibb.co/Xf7T0hJ7/Captura-de-pantalla-2025-10-31-085138.png',
+                            'https://i.ibb.co/p6M3fbfD/Captura-de-pantalla-2025-10-31-085204.png',
+                            'https://i.ibb.co/YBzM2Sws/Captura-de-pantalla-2025-10-31-085230.png',
+                            'https://i.ibb.co/zhFrMYF4/Captura-de-pantalla-2025-10-31-085251.png',
+                            'https://i.ibb.co/0RLDhHTr/Captura-de-pantalla-2025-10-31-085443.png',
+                            'https://i.ibb.co/9H0R4NLf/Captura-de-pantalla-2025-10-31-085504.png',
+                            'https://i.ibb.co/PsWK5648/Captura-de-pantalla-2025-10-31-085522.png',
+                            'https://i.ibb.co/b5vzhDPL/Captura-de-pantalla-2025-10-31-085542.png',
+                            'https://i.ibb.co/YBDGLnmt/Captura-de-pantalla-2025-10-31-085604.png',
+                            'https://i.ibb.co/Y5jvm3V/Captura-de-pantalla-2025-10-31-085627.png',
+                            'https://i.ibb.co/4DdxgsW/Captura-de-pantalla-2025-10-31-085717.png'
+                        ],
+                        videos: ['DCIM01072025.mp4', 'DCIM03072025.mp4', 'DCIM09072025.mp4'],
+                        docs: [] // NO HAY
+                    },
+                    {
+                        name: 'En el campo',
+                        images: [
+                            'https://i.ibb.co/Fkz1b3Nc/Captura-de-pantalla-2025-10-31-090000.png',
+                            'https://i.ibb.co/hxSSqg4K/Captura-de-pantalla-2025-10-31-090019.png',
+                            'https://i.ibb.co/dsZRwYfb/Captura-de-pantalla-2025-10-31-090043.png',
+                            'https://i.ibb.co/bMLKq2Nn/Captura-de-pantalla-2025-10-31-090059.png',
+                            'https://i.ibb.co/NdMTDHtk/Captura-de-pantalla-2025-10-31-090115.png',
+                            'https://i.ibb.co/bMPTywT0/Captura-de-pantalla-2025-10-31-090132.png'
+                        ],
+                        videos: ['DCIM01292025.mp4', 'DCIM12092025.mp4', 'DCIM18092025.mp4'],
+                        docs: [] // NO HAY
+                    },
+                    {
+                        name: 'Fotos Simulador_De_tiro',
+                        images: [
+                            'https://i.ibb.co/7tZZBJ5C/Captura-de-pantalla-2025-10-31-090342.png',
+                            'https://i.ibb.co/4wpknFXN/Captura-de-pantalla-2025-10-31-090405.png',
+                            'https://i.ibb.co/v6vX4m7q/Captura-de-pantalla-2025-10-31-090515.png',
+                            'https://i.ibb.co/VWmqL2tv/Captura-de-pantalla-2025-10-31-090551.png',
+                            'https://i.ibb.co/5xcv5v5c/Captura-de-pantalla-2025-10-31-090614.png',
+                            'https://i.ibb.co/dJ4pTTpg/Captura-de-pantalla-2025-10-31-090632.png',
+                            'https://i.ibb.co/67StRZ1R/Captura-de-pantalla-2025-10-31-090652.png',
+                            'https://i.ibb.co/twm70yYr/Captura-de-pantalla-2025-10-31-090708.png'
+                        ],
+                        videos: ['clip_arena_01.mp4', 'tutorial_recarga.mov'],
+                        docs: ['puntajes_finales.pdf', 'manual_glock.pdf'] // Inventados
+                    },
+                    {
+                        name: 'Programacion y Software',
+                        images: [], // No se especificaron
+                        videos: ['keylogger_demo.avi', 'python_oop.mkv', 'flask_tutorial.mp4'], // Inventados
+                        docs: [ // Inventados, pero con el link
+                            'Catalog_FULL_DAVNAR_TECH.pdf',
+                            'API_Keys_Servidor.txt',
+                            'Proyecto_Final.zip',
+                            'Requisitos_Servidor.docx'
+                        ]
+                    }
                 ];
-
-                const fakeVideoNames = ['video_vacaciones.mp4', 'boda_ana.mov', 'perro_jugando.avi', 'tutorial.mkv', 'clip_001.mp4'];
-                const fakeDocNames = ['factura.pdf', 'contrato.docx', 'presentacion.pptx', 'notas.txt', 'backup.zip'];
 
                 const scanLog = [
                     "Iniciando escaneo...",
                     "Conectando con dispositivo...",
                     "Accediendo al sistema de archivos /storage/emulated/0/...",
                     "Leyendo /storage/emulated/0/DCIM/...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[0].name}</strong> (${foldersToSimulate[0].photos} fotos, ${foldersToSimulate[0].videos} videos, ${foldersToSimulate[0].docs} docs)`,
-                    "Escaneando metadatos EXIF...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[0].name}</strong>`,
                     "Leyendo /storage/emulated/0/Pictures/...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[1].name}</strong> (${foldersToSimulate[1].photos} fotos, ${foldersToSimulate[1].videos} videos, ${foldersToSimulate[1].docs} docs)`,
-                    "Leyendo /storage/emulated/0/Documents/...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[2].name}</strong> (${foldersToSimulate[2].photos} fotos, ${foldersToSimulate[2].videos} videos, ${foldersToSimulate[2].docs} docs)`,
-                    "Analizando subdirectorios...",
-                    `Carpeta encontrada: <strong>${foldersToSimulate[3].name}</strong> (${foldersToSimulate[3].photos} fotos, ${foldersToSimulate[3].videos} videos, ${foldersToSimulate[3].docs} docs)`,
+                    `Carpeta encontrada: <strong>${foldersToSimulate[1].name}</strong>`,
+                    `Carpeta encontrada: <strong>${foldersToSimulate[2].name}</strong>`,
+                    "Leyendo /storage/emulated/0/Documents/Code/...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[3].name}</strong>`,
                     "Escaneo completado. Mostrando resultados."
                 ];
 
@@ -251,56 +315,81 @@
                     }
                 }
 
-                // Función para mostrar los resultados
+                // Función para mostrar los resultados ESTATICOS
                 function showGalleryResults() {
                     btn.textContent = "Escaneo Completo";
                     
-                    foldersToSimulate.forEach((folder, folderIndex) => {
+                    foldersToSimulate.forEach((folder) => {
                         const folderEl = document.createElement('div');
                         folderEl.classList.add('folder');
                         
                         folderEl.innerHTML = `<div class="folder-title">📁 ${folder.name}</div>`;
                         
                         // 1. Mostrar Fotos
-                        if (folder.photos > 0) {
-                            folderEl.innerHTML += `<div class="file-type-title">Fotos (${folder.photos})</div>`;
+                        if (folder.images.length > 0) {
+                            folderEl.innerHTML += `<div class="file-type-title">Fotos (${folder.images.length})</div>`;
                             const photoGrid = document.createElement('div');
                             photoGrid.classList.add('file-grid');
-                            for(let i = 0; i < folder.photos; i++) {
+                            
+                            folder.images.forEach(imageUrl => {
                                 const photoEl = document.createElement('div');
                                 photoEl.classList.add('photo-item');
-                                const randomId = (folderIndex * 100) + i;
-                                photoEl.innerHTML = `<img src="https://picsum.photos/100/100?random=${randomId}" alt="foto simulada">`;
+                                // Usamos la URL real proporcionada
+                                photoEl.innerHTML = `<img src="${imageUrl}" alt="foto simulada">`;
                                 photoGrid.appendChild(photoEl);
-                            }
+                            });
                             folderEl.appendChild(photoGrid);
                         }
 
                         // 2. Mostrar Videos
-                        if (folder.videos > 0) {
-                            folderEl.innerHTML += `<div class="file-type-title">Videos (${folder.videos})</div>`;
+                        if (folder.videos.length > 0) {
+                            folderEl.innerHTML += `<div class="file-type-title">Videos (${folder.videos.length})</div>`;
                             const videoGrid = document.createElement('div');
                             videoGrid.classList.add('file-grid');
-                            for(let i = 0; i < folder.videos; i++) {
+                            
+                            folder.videos.forEach(videoName => {
                                 const videoEl = document.createElement('div');
                                 videoEl.classList.add('video-item');
-                                videoEl.textContent = fakeVideoNames[i % fakeVideoNames.length]; // Rotar nombres
-                                videoGrid.appendChild(videoEl);
-                            }
+                                videoEl.textContent = videoName;
+                                
+                                // LÓGICA ESPECIAL: Link para videos de "En el campo"
+                                if (folder.name === 'En el campo') {
+                                    const link = document.createElement('a');
+                                    link.href = 'https://www.pexels.com/es-es/download/video/856065/';
+                                    link.target = '_blank';
+                                    link.title = `Abrir video: ${videoName}`;
+                                    link.appendChild(videoEl);
+                                    videoGrid.appendChild(link);
+                                } else {
+                                    videoGrid.appendChild(videoEl);
+                                }
+                            });
                             folderEl.appendChild(videoGrid);
                         }
 
                         // 3. Mostrar Documentos
-                        if (folder.docs > 0) {
-                            folderEl.innerHTML += `<div class="file-type-title">Documentos (${folder.docs})</div>`;
+                        if (folder.docs.length > 0) {
+                            folderEl.innerHTML += `<div class="file-type-title">Documentos (${folder.docs.length})</div>`;
                             const docGrid = document.createElement('div');
                             docGrid.classList.add('file-grid');
-                            for(let i = 0; i < folder.docs; i++) {
+                            
+                            folder.docs.forEach(docName => {
                                 const docEl = document.createElement('div');
                                 docEl.classList.add('doc-item');
-                                docEl.textContent = fakeDocNames[i % fakeDocNames.length]; // Rotar nombres
-                                docGrid.appendChild(docEl);
-                            }
+                                docEl.textContent = docName;
+                                
+                                // LÓGICA ESPECIAL: Link para docs de "Programacion y Software"
+                                if (folder.name === 'Programacion y Software') {
+                                    const link = document.createElement('a');
+                                    link.href = 'https://tech.davnar.com/whatsapp_material/davnartech/Catalog_FULL_DAVNAR_TECH_EN_digital_v1.0.9.pdf';
+                                    link.target = '_blank';
+                                    link.title = `Abrir documento: ${docName}`;
+                                    link.appendChild(docEl);
+                                    docGrid.appendChild(link);
+                                } else {
+                                    docGrid.appendChild(docEl);
+                                }
+                            });
                             folderEl.appendChild(docGrid);
                         }
                         
