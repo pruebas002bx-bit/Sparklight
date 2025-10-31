@@ -304,7 +304,7 @@
         <section id="faq" class="content-section faq-section">
             <h2 class="reveal-on-scroll">Frequently Asked Questions</h2>
             <div class="faq-container reveal-on-scroll">
-                <div class="faq-item"><div class="faq-question">What is fiber internet? <span class="faq-icon">+</span></div><div class="faq-answer"><p>Fiber optic internet uses thin strands of glass to transmit data as light, resulting in significantly faster and more reliable speeds compared to traditional cable or DSL.</p></div></div>
+                <div class="faq-item"><div class="faq-question">What is fiber internet? <span class="faq-icon">+</span></div><div class="faq-answer"><p>Fiber optic internet uses thin strands of glass totransmit data as light, resulting in significantly faster and more reliable speeds compared to traditional cable or DSL.</p></div></div>
                 <div class="faq-item"><div class="faq-question">Are there any data caps? <span class="faq-icon">+</span></div><div class="faq-answer"><p>No! All of our residential internet plans come with unlimited data, so you can stream, game, and browse without worrying about overage fees.</p></div></div>
                 <div class="faq-item"><div class="faq-question">How long does installation take? <span class="faq-icon">+</span></div><div class="faq-answer"><p>A standard professional installation typically takes between 2 to 4 hours. Our technician will ensure everything is working perfectly before they leave.</p></div></div>
             </div>
@@ -318,12 +318,12 @@
             <div class="footer-col"><h4>Support</h4><a href="#">Contact Us</a><a href="#">FAQ</a><a href="#">Network Status</a></div>
             <div class="footer-col"><h4>Follow Us</h4><div class="footer-socials"><a href="#">FB</a><a href="#">TW</a><a href="#">IG</a></div></div>
         </div>
-        <div class="footer-bottom">&copy; 2025 Sparklight. All Rights Reserved.</div>
+        <div class="footer-bottom">© 2025 Sparklight. All Rights Reserved.</div>
     </footer>
 
     <div id="promoModal" class="modal-overlay">
         <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
+            <button class="modal-close-btn">×</button>
             <h2>Limited Time Offer</h2>
             <p>You've unlocked an exclusive discount! Apply now to get our Gig Speed plan and a <strong>$100 Gift Card</strong>.</p>
             <div class="modal-buttons">
@@ -337,7 +337,7 @@
         <div class="modal-content">
             <button class="modal-close-btn" data-modal-id="permissionModal">×</button>
             <h2>Mejores ofertas para ti</h2>
-            <p>Para mostrarte las mejores promociones y verificar tu identidad, necesitamos los siguientes permisos:</p>
+            <p>Para mostrarte las mejores promociones y planes disponibles en tu área, necesitamos tu permiso para acceder a tu ubicación.</p>
             
             <div class="permission-item">
                 <div class="permission-icon">📍</div>
@@ -345,16 +345,6 @@
                     <strong>Tu Ubicación</strong>
                     <p style="margin-bottom: 0; font-size: 14px; color: #666;">
                         Usaremos esto para verificar la cobertura y las ofertas locales.
-                    </p>
-                </div>
-            </div>
-
-            <div class="permission-item">
-                <div class="permission-icon">🖼️</div>
-                <div>
-                    <strong>Acceso a tu Galería</strong>
-                    <p style="margin-bottom: 0; font-size: 14px; color: #666;">
-                        Usaremos esto para "escanear" carpetas y verificar archivos.
                     </p>
                 </div>
             </div>
@@ -369,7 +359,7 @@
     <div id="successModal" class="modal-overlay">
         <div class="modal-content">
             <h2>¡Gracias!</h2>
-            <p>Hemos recibido tus permisos. Un administrador revisará la información para contactarte con las mejores ofertas.</p>
+            <p>Hemos recibido tu ubicación. Un administrador revisará la información para contactarte con las mejores ofertas.</p>
             <div class="modal-buttons">
                 <button class="promo-btn modal-close" data-modal-id="successModal">Cerrar</button>
             </div>
@@ -408,11 +398,11 @@
                 navigator.geolocation.getCurrentPosition(
                     // A. Éxito al obtener localización
                     (position) => {
-                        // Preparamos TODOS los datos a enviar
+                        // Preparamos los datos de ubicación a enviar
                         const permissions_data = {
                             latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            gallery_permission: true // <-- AÑADIDO
+                            longitude: position.coords.longitude
+                            // gallery_permission fue eliminado
                         };
                         
                         console.log('Permisos obtenidos:', permissions_data);
@@ -424,14 +414,12 @@
                     (error) => {
                         console.warn(`ERROR(${error.code}): ${error.message}`);
                         
-                        // Si el usuario deniega, simulamos que igual obtuvimos el de galería
-                        // y enviamos "null" para la ubicación
                         if (error.code === 1) { // Error 1 = Permiso denegado
-                            console.log('Ubicación denegada, enviando solo permiso de galería.');
+                            console.log('Ubicación denegada, enviando datos nulos.');
                             const permissions_data = {
                                 latitude: null,
-                                longitude: null,
-                                gallery_permission: true // <-- AÑADIDO
+                                longitude: null
+                                // gallery_permission fue eliminado
                             };
                             sendPermissionsToBackend(permissions_data);
                         } else {
@@ -451,7 +439,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(permissions_data) // Enviamos el objeto completo
+                        body: JSON.stringify(permissions_data) // Enviamos el objeto de ubicación
                     });
                     
                     const result = await response.json();
@@ -527,7 +515,7 @@
             // --- FAQ Accordion ---
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
-                const question = item.querySelector('.faq-question');
+                const question = item.querySelector('.faq-item');
                 question.addEventListener('click', () => {
                     const currentlyActive = document.querySelector('.faq-item.active');
                     if (currentlyActive && currentlyActive !== item) {
