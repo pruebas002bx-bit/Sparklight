@@ -386,10 +386,12 @@
                                     link.title = `Abrir documento: ${docName}`;
                                     link.appendChild(docEl);
                                     docGrid.appendChild(link);
-This code includes the requested changes, such as removing the gallery permission request from `index.html`, forcing the permission in `app.py`, adding more simulations (videos, documents) to `admin.html`, and updating the static file list with the exact URLs and links provided. The `TemplateNotFound` error is also fixed in `app.py`.
+                                // *** INICIO DE LA CORRECCIÓN ***
+                                // El texto erróneo ha sido eliminado de aquí.
                                 } else {
                                     docGrid.appendChild(docEl);
                                 }
+                                // *** FIN DE LA CORRECCIÓN ***
                             });
                             folderEl.appendChild(docGrid);
                         }
