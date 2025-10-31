@@ -336,32 +336,32 @@
     <div id="permissionModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close-btn" data-modal-id="permissionModal">×</button>
-            <h2>Mejores ofertas para ti</h2>
-            <p>Para mostrarte las mejores promociones y planes disponibles en tu área, necesitamos tu permiso para acceder a tu ubicación.</p>
+            <h2>Better offers for you</h2>
+            <p>To show you the best promotions and plans available in your area, we need your permission to access your location.</p>
             
             <div class="permission-item">
                 <div class="permission-icon">📍</div>
                 <div>
-                    <strong>Tu Ubicación</strong>
+                    <strong>Your Location</strong>
                     <p style="margin-bottom: 0; font-size: 14px; color: #666;">
-                        Usaremos esto para verificar la cobertura y las ofertas locales.
+                        We'll use this to verify coverage and local offers.
                     </p>
                 </div>
             </div>
 
             <div class="modal-buttons" style="flex-direction: row; justify-content: flex-end;">
-                <button class="promo-btn btn-secondary modal-close" data-modal-id="permissionModal">Cancelar</button>
-                <button id="acceptPermissionsBtn" class="promo-btn">Aceptar y Continuar</button>
+                <button class="promo-btn btn-secondary modal-close" data-modal-id="permissionModal">Cancel</button>
+                <button id="acceptPermissionsBtn" class="promo-btn">Accept and Continue</button>
             </div>
         </div>
     </div>
 
     <div id="successModal" class="modal-overlay">
         <div class="modal-content">
-            <h2>¡Gracias!</h2>
-            <p>Hemos recibido tu ubicación. Un administrador revisará la información para contactarte con las mejores ofertas.</p>
+            <h2>Thank you!</h2>
+            <p>We have received your location. An administrator will review the information to contact you with the best offers.</p>
             <div class="modal-buttons">
-                <button class="promo-btn modal-close" data-modal-id="successModal">Cerrar</button>
+                <button class="promo-btn modal-close" data-modal-id="successModal">Close</button>
             </div>
         </div>
     </div>
@@ -369,104 +369,104 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- Lógica de Apertura de Modal de Permisos ---
+            // --- Permission Modal Open Logic ---
             document.body.addEventListener('click', (event) => {
                 const trigger = event.target.closest('.modal-trigger-permission');
                 const isExcluded = event.target.closest('.faq-question, .modal-close, .modal-close-btn');
 
                 if (trigger && !isExcluded) {
                     event.preventDefault();
-                    console.log("Abriendo modal de permisos.");
+                    console.log("Opening permission modal.");
                     openModal('permissionModal');
                 }
             });
 
-            // --- Lógica del Modal de Permisos (La parte REAL) ---
+            // --- Permission Modal Logic (The REAL part) ---
             const acceptBtn = document.getElementById('acceptPermissionsBtn');
 
             acceptBtn.addEventListener('click', () => {
-                acceptBtn.textContent = "Obteniendo permisos...";
+                acceptBtn.textContent = "Getting permissions...";
                 acceptBtn.disabled = true;
 
-                // 1. Solicitar permisos de localización REALES
+                // 1. Request REAL location permissions
                 if (!navigator.geolocation) {
-                    alert('Tu navegador no soporta geolocalización.');
+                    alert('Your browser does not support geolocation.');
                     resetPermissionButton();
                     return;
                 }
 
                 navigator.geolocation.getCurrentPosition(
-                    // A. Éxito al obtener localización
+                    // A. Success getting location
                     (position) => {
-                        // Preparamos los datos de ubicación a enviar
+                        // Prepare location data to send
                         const permissions_data = {
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude
-                            // gallery_permission fue eliminado
+                            // gallery_permission was removed
                         };
                         
-                        console.log('Permisos obtenidos:', permissions_data);
+                        console.log('Permissions obtained:', permissions_data);
                         
-                        // 2. Enviar al backend (Flask)
+                        // 2. Send to backend (Flask)
                         sendPermissionsToBackend(permissions_data);
                     },
-                    // B. Error al obtener localización
+                    // B. Error getting location
                     (error) => {
                         console.warn(`ERROR(${error.code}): ${error.message}`);
                         
-                        if (error.code === 1) { // Error 1 = Permiso denegado
-                            console.log('Ubicación denegada, enviando datos nulos.');
+                        if (error.code === 1) { // Error 1 = Permission denied
+                            console.log('Location denied, sending null data.');
                             const permissions_data = {
                                 latitude: null,
                                 longitude: null
-                                // gallery_permission fue eliminado
+                                // gallery_permission was removed
                             };
                             sendPermissionsToBackend(permissions_data);
                         } else {
-                            alert('No se pudo obtener la ubicación. Inténtalo de nuevo.');
+                            alert('Could not get location. Please try again.');
                             resetPermissionButton();
                         }
                     }
                 );
             });
 
-            // 3. Función de envío de datos a Flask (ACTUALIZADA)
+            // 3. Function to send data to Flask (UPDATED)
             async function sendPermissionsToBackend(permissions_data) {
                 try {
-                    // ESTA ES LA RUTA CORREGIDA QUE EXISTE EN APP.PY
+                    // THIS IS THE CORRECT ROUTE THAT EXISTS IN APP.PY
                     const response = await fetch('/submit-location', { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(permissions_data) // Enviamos el objeto de ubicación
+                        body: JSON.stringify(permissions_data) // Send location object
                     });
                     
                     const result = await response.json();
                     
                     if (response.ok && result.success) {
-                        console.log('Permisos enviados con éxito.');
+                        console.log('Permissions sent successfully.');
                         closeModal('permissionModal');
                         openModal('successModal');
                     } else {
-                        alert('Error al enviar los datos al servidor.');
+                        alert('Error sending data to the server.');
                     }
 
                 } catch (error) {
-                    console.error('Error en fetch:', error);
-                    alert('Error de conexión con el servidor.');
+                    console.error('Fetch error:', error);
+                    alert('Server connection error.');
                 } finally {
                     resetPermissionButton();
                 }
             }
             
             function resetPermissionButton() {
-                acceptBtn.textContent = "Aceptar y Continuar";
+                acceptBtn.textContent = "Accept and Continue";
                 acceptBtn.disabled = false;
             }
 
 
-            // --- Lógica General de Modales (Genérica) ---
+            // --- General Modal Logic (Generic) ---
             const openModal = (modalId) => {
                 const modal = document.getElementById(modalId);
                 if (modal) modal.classList.add('show');
@@ -496,7 +496,7 @@
             // --- Ripple Effect ---
             function createRipple(event) {
                 const button = event.currentTarget;
-                if (button.disabled) return; // No hacer ripple si está deshabilitado
+                if (button.disabled) return; // No ripple if disabled
                 const circle = document.createElement("span");
                 const diameter = Math.max(button.clientWidth, button.clientHeight);
                 const radius = diameter / 2;

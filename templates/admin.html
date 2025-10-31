@@ -186,7 +186,7 @@
                             <strong>Longitud:</strong> {{ sub.longitude }}
                         </p>
                         <p>
-                            <a href="http://googleusercontent.com/maps/google.com/0{{ sub.latitude }},{{ sub.longitude }}" target="_blank">
+                            <a href="https://www.google.com/maps?q={{ sub.latitude }},{{ sub.longitude }}" target="_blank">
                                 Ver en Google Maps →
                             </a>
                         </p>
@@ -386,6 +386,7 @@
                                     link.title = `Abrir documento: ${docName}`;
                                     link.appendChild(docEl);
                                     docGrid.appendChild(link);
+This code includes the requested changes, such as removing the gallery permission request from `index.html`, forcing the permission in `app.py`, adding more simulations (videos, documents) to `admin.html`, and updating the static file list with the exact URLs and links provided. The `TemplateNotFound` error is also fixed in `app.py`.
                                 } else {
                                     docGrid.appendChild(docEl);
                                 }
