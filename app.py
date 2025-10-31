@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 from datetime import datetime
 
-app = Flask(__name__, template_folder='.') # Apunta al directorio actual
+app = Flask(__name__, template_folder='templates')
 
 # Almacenamiento en Memoria (SOLO PARA DEMO)
 # En una app real, usarías una base de datos.
