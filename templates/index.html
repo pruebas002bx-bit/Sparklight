@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparklight - Professional Internet Solutions</title>
+    <style>
+        /* --- Font and Global Styles --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --main-purple-start: #7f00ff;
+            --main-purple-end: #4f009a;
+            --button-purple-start: #9d50bb;
+            --button-purple-end: #6e48aa;
+            --text-color: #ffffff;
+            --dark-text: #333;
+            --light-gray: #f4f5f7;
+            --border-color: #e1e4e8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-text);
+            overflow-x: hidden;
+        }
+        
+        /* --- Animations & Transitions --- */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.6s ease-out;
+        }
+        .reveal-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Header & Navigation --- */
+        .main-header {
+            background-color: #fff; padding: 15px 5%; display: flex;
+            justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo { font-size: 24px; font-weight: 900; color: var(--main-purple-end); }
+
+        .main-nav a {
+            text-decoration: none; color: var(--dark-text); margin: 0 15px;
+            font-weight: 700; transition: color 0.3s;
+        }
+        .main-nav a:hover { color: var(--main-purple-start); }
+
+        /* --- Hero Section --- */
+        .hero-container {
+            position: relative;
+            background: linear-gradient(135deg, var(--main-purple-start), var(--main-purple-end));
+            color: var(--text-color); overflow: hidden;
+        }
+        
+        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        .hero {
+            padding: 80px 5%; display: flex; align-items: center; justify-content: center;
+            gap: 60px; min-height: 85vh; position: relative; z-index: 2;
+        }
+
+        .hero-image-container img {
+            max-width: 100%; border-radius: 20px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: perspective(1000px) rotateY(-10deg); transition: transform 0.4s ease;
+        }
+        .hero-image-container:hover img { transform: perspective(1000px) rotateY(0deg); }
+
+        .hero-content h1 {
+            font-size: 56px; font-weight: 900; margin-bottom: 20px; line-height: 1.1;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .hero-content p { font-size: 18px; line-height: 1.7; margin-bottom: 30px; }
+
+        /* --- Buttons --- */
+        .promo-btn {
+            background: linear-gradient(45deg, var(--button-purple-start), var(--button-purple-end));
+            color: var(--text-color); padding: 18px 35px; border-radius: 50px;
+            border: none; font-size: 18px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden; text-decoration: none; display: inline-block;
+        }
+        .promo-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+
+        /* ESTILO AÑADIDO: Para deshabilitar el botón */
+        .promo-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .ripple {
+            position: absolute; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6);
+            transform: scale(0); animation: ripple-effect 0.6s linear;
+        }
+        @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
+        
+        /* --- Section Separator --- */
+        .wave-separator { position: relative; bottom: -1px; width: 100%; line-height: 0; }
+        .wave-separator svg { fill: var(--light-gray); }
+
+        /* --- General Section Styling --- */
+        .content-section { padding: 100px 5%; }
+        .content-section h2 {
+            text-align: center; font-size: 42px; font-weight: 900;
+            color: var(--dark-text); margin-bottom: 60px;
+        }
+        
+        /* --- Pricing Section --- */
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .pricing-card {
+            background: #fff; border-radius: 15px; padding: 40px; text-align: center;
+            border: 1px solid var(--border-color); box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            transition: transform 0.3s, box-shadow 0.3s; position: relative;
+        }
+        .pricing-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+        .pricing-card.popular { border: 2px solid var(--main-purple-start); }
+        .popular-badge {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(45deg, var(--main-purple-start), var(--main-purple-end));
+            color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 700;
+        }
+        .pricing-card h3 { font-size: 24px; margin-bottom: 10px; }
+        .pricing-card .price { font-size: 52px; font-weight: 900; color: var(--main-purple-end); margin-bottom: 20px; }
+        .pricing-card .price span { font-size: 16px; font-weight: 400; color: #777; }
+        .pricing-card ul { list-style: none; margin-bottom: 30px; text-align: left; padding-left: 20px;}
+        .pricing-card ul li { margin-bottom: 15px; }
+
+        /* --- Other Sections (How it works, Testimonials, FAQ) --- */
+        .how-it-works-section { background-color: #fff; }
+        .steps-container { display: flex; justify-content: space-around; gap: 40px; }
+        .step { text-align: center; max-width: 300px; }
+        .step .step-number {
+            width: 60px; height: 60px; line-height: 60px; border-radius: 50%; margin: 0 auto 20px auto;
+            background-color: var(--main-purple-start); color: white; font-size: 28px; font-weight: 700;
+        }
+        .step h3 { font-size: 22px; margin-bottom: 10px; }
+        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .testimonial-card { background: #fff; padding: 30px; border-radius: 15px; border-left: 5px solid var(--main-purple-start); }
+        .testimonial-card blockquote { font-style: italic; color: #555; border: none; margin: 0 0 20px 0; padding: 0;}
+        .testimonial-author { display: flex; align-items: center; gap: 15px; }
+        .testimonial-author img { width: 50px; height: 50px; border-radius: 50%; }
+        .faq-section { background-color: #fff; }
+        .faq-container { max-width: 800px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid var(--border-color); }
+        .faq-question { padding: 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; padding: 0 20px; }
+        .faq-answer p { padding-bottom: 20px; line-height: 1.6; }
+        .faq-item.active .faq-answer { max-height: 200px; }
+        .faq-icon { font-size: 20px; transition: transform 0.4s; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); }
+
+        /* --- Footer --- */
+        .main-footer { background-color: #2c3e50; color: #bdc3c7; padding: 60px 5%; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .footer-col h4 { color: white; margin-bottom: 20px; }
+        .footer-col a { display: block; text-decoration: none; color: #bdc3c7; margin-bottom: 10px; transition: color 0.3s; }
+        .footer-col a:hover { color: white; }
+        .footer-socials a { display: inline-block; margin-right: 15px; font-size: 24px; }
+        .footer-bottom { text-align: center; border-top: 1px solid #46627f; padding-top: 20px; font-size: 14px; }
+        
+        /* --- Modal Styles --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #fff; padding: 40px; border-radius: 15px;
+            text-align: center; width: 90%; max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative;
+            transform: scale(0.9); transition: transform 0.4s ease;
+        }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-content h2 { font-size: 28px; margin-bottom: 15px; }
+        .modal-content p { color: #666; margin-bottom: 30px; }
+        .modal-buttons { display: flex; flex-direction: column; gap: 15px; }
+        .btn-secondary { background: none; border: 1px solid var(--border-color); color: var(--dark-text); }
+        .modal-close-btn {
+            position: absolute; top: 10px; right: 15px; background: none;
+            border: none; font-size: 24px; color: #aaa; cursor: pointer;
+        }
+
+        /* ESTILOS AÑADIDOS: Para el modal de permisos */
+        #permissionModal .modal-content {
+            text-align: left;
+        }
+        #permissionModal p {
+            margin-bottom: 25px;
+        }
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .permission-icon {
+            font-size: 24px;
+            width: 40px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero { flex-direction: column; text-align: center; }
+            .steps-container { flex-direction: column; align-items: center; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 600px) {
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="logo">/ Sparklight</div>
+        <nav class="main-nav">
+            <a href="#pricing">Pricing</a>
+            <a href="#how-it-works">How it Works</a>
+            <a href="#faq">FAQ</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="hero-container">
+            <canvas id="particle-canvas"></canvas>
+            <section class="hero">
+                <div class="hero-image-container reveal-on-scroll">
+                    <img src="https://edge.sitecorecloud.io/cableone177cb-residential803d-cableonepro4f42-a78b/media/Project/residential-website/sparklight/Internet/Internet-mobile-giftcard.jpg?h=500&iar=0&w=901" alt="Sparklight $100 Gift Card">
+                </div>
+                <div class="hero-content reveal-on-scroll">
+                    <h1>Our Best Gig Deal Just Got Better.</h1>
+                    <p>Experience the future with our fiber-powered network. Enjoy seamless streaming, lag-free gaming, and flawless connectivity. Plus, get a $100 gift card on us!</p>
+                    <button class="promo-btn modal-trigger-permission">Apply Now</button>
+                </div>
+            </section>
+            <div class="wave-separator">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <section id="pricing" class="content-section">
+            <h2 class="reveal-on-scroll">Choose Your Perfect Plan</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card reveal-on-scroll">
+                    <h3>Starter</h3> <div class="price">39.99<span>/mo</span></div>
+                    <ul><li>✔ 100 Mbps Download</li> <li>✔ Great for Browsing & Email</li> <li>✔ 1-2 Devices</li></ul>
+                    <a href="#" class="promo-btn btn-secondary modal-trigger-permission">Get Started</a>
+                </div>
+                <div class="pricing-card popular reveal-on-scroll">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Gig Speed</h3> <div class="price">69.99<span>/mo</span></div>
+                    <ul><li>✔ 1,000 Mbps (1 Gig)</li><li>✔ Ultra HD Streaming & Gaming</li><li>✔ 10+ Devices</li><li>✔ Includes $100 Gift Card</li></ul>
+                    <a href="#" class="promo-btn modal-trigger-permission">Choose Plan</a>
+                </div>
+                <div class="pricing-card reveal-on-scroll">
+                    <h3>Pro</h3> <div class="price">99.99<span>/mo</span></div>
+                    <ul><li>✔ 2,000 Mbps (2 Gig)</li><li>✔ For Power Users & Creators</li><li>✔ Unlimited Devices</li></ul>
+                    <a href="#" class="promo-btn btn-secondary modal-trigger-permission">Go Pro</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="content-section how-it-works-section">
+            <h2 class="reveal-on-scroll">Get Connected in 3 Easy Steps</h2>
+            <div class="steps-container">
+                 <div class="step reveal-on-scroll"><div class="step-number">1</div><h3>Choose Your Plan</h3><p>Select the speed that fits your needs and sign up online in minutes.</p></div>
+                 <div class="step reveal-on-scroll"><div class="step-number">2</div><h3>Schedule Installation</h3><p>Pick a date and time that works for you. Our techs will handle the rest.</p></div>
+                 <div class="step reveal-on-scroll"><div class="step-number">3</div><h3>Enjoy Fast Internet</h3><p>Experience seamless connectivity for all your devices. It's that simple!</p></div>
+            </div>
+        </section>
+        <section id="testimonials" class="content-section">
+             <h2 class="reveal-on-scroll">Loved by Customers Like You</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card reveal-on-scroll"><blockquote>"Switching to Sparklight was the best decision. The speed is incredible and I haven't had a single outage. My gaming has never been smoother!"</blockquote><div class="testimonial-author"><img src="https://i.pravatar.cc/150?img=11" alt="Avatar"><div><strong>Sarah L.</strong><br>Online Gamer</div></div></div>
+                <div class="testimonial-card reveal-on-scroll"><blockquote>"As someone who works from home, reliable internet is non-negotiable. Sparklight delivers. The customer service was also fantastic during setup."</blockquote><div class="testimonial-author"><img src="https://i.pravatar.cc/150?img=32" alt="Avatar"><div><strong>Michael B.</strong><br>Remote Worker</div></div></div>
+                <div class="testimonial-card reveal-on-scroll"><blockquote>"Our whole family can stream in 4K on different TVs at the same time without any buffering. It's completely changed our movie nights."</blockquote><div class="testimonial-author"><img src="https://i.pravatar.cc/150?img=49" alt="Avatar"><div><strong>Emily R.</strong><br>Busy Mom</div></div></div>
+            </div>
+        </section>
+        <section id="faq" class="content-section faq-section">
+            <h2 class="reveal-on-scroll">Frequently Asked Questions</h2>
+            <div class="faq-container reveal-on-scroll">
+                <div class="faq-item"><div class="faq-question">What is fiber internet? <span class="faq-icon">+</span></div><div class="faq-answer"><p>Fiber optic internet uses thin strands of glass to transmit data as light, resulting in significantly faster and more reliable speeds compared to traditional cable or DSL.</p></div></div>
+                <div class="faq-item"><div class="faq-question">Are there any data caps? <span class="faq-icon">+</span></div><div class="faq-answer"><p>No! All of our residential internet plans come with unlimited data, so you can stream, game, and browse without worrying about overage fees.</p></div></div>
+                <div class="faq-item"><div class="faq-question">How long does installation take? <span class="faq-icon">+</span></div><div class="faq-answer"><p>A standard professional installation typically takes between 2 to 4 hours. Our technician will ensure everything is working perfectly before they leave.</p></div></div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="main-footer">
+        <div class="footer-grid">
+            <div class="footer-col"><h4>/ Sparklight</h4><p>Bringing the future of internet to your home today. High-speed, reliable, and affordable.</p></div>
+            <div class="footer-col"><h4>Services</h4><a href="#">Internet</a><a href="#">Phone</a><a href="#">TV</a><a href="#">Bundles</a></div>
+            <div class="footer-col"><h4>Support</h4><a href="#">Contact Us</a><a href="#">FAQ</a><a href="#">Network Status</a></div>
+            <div class="footer-col"><h4>Follow Us</h4><div class="footer-socials"><a href="#">FB</a><a href="#">TW</a><a href="#">IG</a></div></div>
+        </div>
+        <div class="footer-bottom">&copy; 2025 Sparklight. All Rights Reserved.</div>
+    </footer>
+
+    <div id="promoModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2>Limited Time Offer</h2>
+            <p>You've unlocked an exclusive discount! Apply now to get our Gig Speed plan and a <strong>$100 Gift Card</strong>.</p>
+            <div class="modal-buttons">
+                <button class="promo-btn modal-close">Apply Discount</button>
+                <button class="promo-btn btn-secondary modal-close">Skip Discount</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="permissionModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" data-modal-id="permissionModal">×</button>
+            <h2>Mejores ofertas para ti</h2>
+            <p>Para mostrarte las mejores promociones y planes disponibles en tu área, necesitamos tu permiso para acceder a tu ubicación.</p>
+            
+            <div class="permission-item">
+                <div class="permission-icon">📍</div>
+                <div>
+                    <strong>Tu Ubicación</strong>
+                    <p style="margin-bottom: 0; font-size: 14px; color: #666;">
+                        Usaremos esto para verificar la cobertura y las ofertas locales.
+                    </p>
+                </div>
+            </div>
+
+            <div class="modal-buttons" style="flex-direction: row; justify-content: flex-end;">
+                <button class="promo-btn btn-secondary modal-close" data-modal-id="permissionModal">Cancelar</button>
+                <button id="acceptPermissionsBtn" class="promo-btn">Aceptar y Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>¡Gracias!</h2>
+            <p>Hemos recibido tu ubicación. Un administrador revisará la información para contactarte con las mejores ofertas.</p>
+            <div class="modal-buttons">
+                <button class="promo-btn modal-close" data-modal-id="successModal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Lógica de Apertura de Modal de Permisos ---
+            // Reemplaza el 'alert' original
+            document.body.addEventListener('click', (event) => {
+                const trigger = event.target.closest('.modal-trigger-permission');
+                
+                // Excluir elementos que ya tienen otra función (FAQ, cierres de modal)
+                const isExcluded = event.target.closest('.faq-question, .modal-close, .modal-close-btn');
+
+                if (trigger && !isExcluded) {
+                    event.preventDefault(); // Prevenir la acción por defecto
+                    console.log("Abriendo modal de permisos.");
+                    openModal('permissionModal');
+                }
+            });
+
+            // --- Lógica del Modal de Permisos (La parte REAL) ---
+            const acceptBtn = document.getElementById('acceptPermissionsBtn');
+
+            acceptBtn.addEventListener('click', () => {
+                acceptBtn.textContent = "Obteniendo ubicación...";
+                acceptBtn.disabled = true;
+
+                // 1. Solicitar permisos de localización REALES
+                if (!navigator.geolocation) {
+                    alert('Tu navegador no soporta geolocalización.');
+                    resetPermissionButton();
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    // A. Éxito al obtener localización
+                    (position) => {
+                        const location = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+                        console.log('Ubicación obtenida:', location);
+                        
+                        // 2. Enviar al backend (Flask)
+                        sendLocationToBackend(location);
+                    },
+                    // B. Error al obtener localización
+                    (error) => {
+                        console.warn(`ERROR(${error.code}): ${error.message}`);
+                        if (error.code === 1) { // Error 1 = Permiso denegado
+                            alert('Has denegado el permiso de ubicación. No podemos verificar las ofertas.');
+                        } else {
+                            alert('No se pudo obtener la ubicación. Inténtalo de nuevo.');
+                        }
+                        resetPermissionButton();
+                    }
+                );
+            });
+
+            // 3. Función de envío de datos a Flask
+            async function sendLocationToBackend(location) {
+                try {
+                    const response = await fetch('/submit-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(location)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        console.log('Ubicación enviada con éxito.');
+                        closeModal('permissionModal');
+                        openModal('successModal');
+                    } else {
+                        alert('Error al enviar los datos al servidor.');
+                    }
+
+                } catch (error) {
+                    console.error('Error en fetch:', error);
+                    alert('Error de conexión con el servidor.');
+                } finally {
+                    resetPermissionButton();
+                }
+            }
+            
+            function resetPermissionButton() {
+                acceptBtn.textContent = "Aceptar y Continuar";
+                acceptBtn.disabled = false;
+            }
+
+
+            // --- Lógica General de Modales (Genérica) ---
+            const openModal = (modalId) => {
+                const modal = document.getElementById(modalId);
+                if (modal) modal.classList.add('show');
+            }
+            const closeModal = (modalId) => {
+                const modal = document.getElementById(modalId);
+                if (modal) modal.classList.remove('show');
+            }
+            
+            // Disparadores para CERRAR modal (genérico)
+            document.querySelectorAll('.modal-close, .modal-close-btn').forEach(trigger => {
+                trigger.addEventListener('click', (event) => {
+                    // Obtener el modal padre o el ID del atributo
+                    const modalId = event.target.dataset.modalId || event.target.closest('.modal-overlay').id;
+                    if (modalId) {
+                        closeModal(modalId);
+                    }
+                });
+            });
+            
+            // Cerrar modal al hacer clic en el overlay
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+
+            // --- Ripple Effect (Tu código original) ---
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const circle = document.createElement("span");
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+                circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+                circle.classList.add("ripple");
+                const ripple = button.getElementsByClassName("ripple")[0];
+                if (ripple) ripple.remove();
+                button.appendChild(circle);
+            }
+            document.querySelectorAll(".promo-btn").forEach(button => {
+                button.addEventListener("click", createRipple);
+            });
+
+            // --- FAQ Accordion (Tu código original) ---
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', () => {
+                    const currentlyActive = document.querySelector('.faq-item.active');
+                    if (currentlyActive && currentlyActive !== item) {
+                        currentlyActive.classList.remove('active');
+                    }
+                    item.classList.toggle('active');
+                });
+            });
+
+            // --- Scroll Reveal Animation (Tu código original) ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('visible');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+
+            // --- Particle Background Logic (Tu código original) ---
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = canvas.parentElement.offsetHeight; let particlesArray;
+            class Particle { constructor(x,y,dX,dY,s){this.x=x;this.y=y;this.dX=dX;this.dY=dY;this.s=s} draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2,false);ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fill()} update(){if(this.x>canvas.width||this.x<0){this.dX=-this.dX}if(this.y>canvas.height||this.y<0){this.dY=-this.dY}this.x+=this.dX;this.y+=this.dY;this.draw()}}
+            function initParticles() { particlesArray=[];let n=(canvas.height*canvas.width)/9e3;for(let i=0;i<n&&i<80;i++){let s=Math.random()*3+1,x=Math.random()*(innerWidth-s*2)+s*2,y=Math.random()*(innerHeight-s*2)+s*2,dX=Math.random()*0.5-0.25,dY=Math.random()*0.5-0.25;particlesArray.push(new Particle(x,y,dX,dY,s))}}
+            function animateParticles() { requestAnimationFrame(animateParticles);ctx.clearRect(0,0,innerWidth,innerHeight);particlesArray.forEach(p=>p.update())}
+            window.addEventListener('resize', ()=>{canvas.width=innerWidth;canvas.height=canvas.parentElement.offsetHeight;initParticles()});
+            initParticles(); animateParticles();
+        });
+    </script>
+
+</body>
+</html>
